@@ -1,9 +1,22 @@
 package com.bork.industries;
 
-import lombok.Data;
-
-public @Data class ApplicationOptions {
+public class ApplicationOptions {
 	private String commPort;
 	private boolean listPorts;
 
+	public String getCommPort() {
+		return commPort;
+	}
+
+	public void setCommPort(String commPort) {
+		this.commPort = commPort;
+	}
+
+	public boolean isListPorts() {
+		return listPorts;
+	}
+
+	public void setListPorts(boolean listPorts) {
+		this.listPorts = listPorts;
+	}
 }
