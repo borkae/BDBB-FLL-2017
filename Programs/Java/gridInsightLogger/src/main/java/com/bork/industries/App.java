@@ -1,24 +1,23 @@
 package com.bork.industries;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.*;
+import org.springframework.web.client.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import com.bork.industries.meter.line.parser.*;
+import com.bork.industries.meter.line.parser.types.MeterReading;
 import com.fazecast.jSerialComm.SerialPort;
 
 public class App {
 	private static final String LIST_PORTS_OPTION_NAME = "listPorts";
 	private static final String PORT_OPTION_NAME = "port";
+
+	private static RestOperations restOperations = new RestTemplate();
+	private static MeterLineParser meterLineParser = new MeterLineParserStringUtilsImpl();
 
 	public static void main(String[] args) {
 		Options options = createOptions();
@@ -37,9 +36,9 @@ public class App {
 			} else if (StringUtils.isNotBlank(appOptions.getCommPort())) {
 				SerialPort port = SerialPort.getCommPort(appOptions.getCommPort());
 				port.openPort();
-				port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 10*1000, 0);
+				port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 10 * 1000, 0);
 				port.setBaudRate(115200);
-				displayData(port);
+				listenToPort(port);
 				port.closePort();
 			} else {
 				usage(options);
@@ -50,7 +49,7 @@ public class App {
 		}
 	}
 
-	private static void displayData(SerialPort port) {
+	private static void listenToPort(SerialPort port) {
 		boolean done = false;
 		InputStream inputStream = port.getInputStream();
 		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -62,6 +61,24 @@ public class App {
 					line = bufferedReader.readLine();
 
 					System.out.println(line);
+
+					MeterReading meterReading = meterLineParser.determineMeterReading(line);
+
+					//@formatter:off
+					UriComponentsBuilder builder = UriComponentsBuilder
+							.fromHttpUrl("https://api.thingspek.com/update")
+							.queryParam("api_key", "W7BI5H4Z0CMJAUNU")
+							.queryParam("field1", meterReading.getMeterId())
+							.queryParam("field2", String.valueOf(meterReading.getCurrentGallons()));
+					//@formatter:on
+
+					HttpEntity<?> entity = new HttpEntity<>(null);
+					try {
+						restOperations.exchange(builder.build().encode().toUri(), HttpMethod.GET, entity, String.class);
+					} catch (Exception e) {
+						System.out.println("Could not send data to ThingSpeak.");
+						e.printStackTrace();
+					}
 				} while (!done);
 			} catch (Exception e) {
 				e.printStackTrace();

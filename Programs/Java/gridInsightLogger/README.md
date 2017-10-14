@@ -12,3 +12,4 @@ The java program uses Apache's CLI library to manage command line parameters.  R
 0.0.1
 - Just beginning
 
+GET https://api.thingspeak.com/update?api_key=W7BI5H4Z0CMJAUNU&field1=0&field2=0
