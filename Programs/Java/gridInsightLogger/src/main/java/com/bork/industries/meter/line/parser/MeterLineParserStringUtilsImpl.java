@@ -16,7 +16,7 @@ public class MeterLineParserStringUtilsImpl implements MeterLineParser {
 		return meterReading;
 	}
 
-	private double convertToDouble(String stringValue) {
+	private static double convertToDouble(String stringValue) {
 		return Double.valueOf(stringValue);
 	}
 }
