@@ -23,8 +23,8 @@ public class StubSensorCollectorTest {
 	public void read_staticValues_verifyResults() {
 		SensorReading reading = sensorCollector.read();
 
-		assertEquals(TEMP_SENSOR_1, reading.getTempSensor1(), 0.1);
-		assertEquals(TEMP_SENSOR_2, reading.getTempSensor2(), 0.1);
+		assertEquals(TEMP_SENSOR_1, reading.getTemperatureSensor1(), 0.1);
+		assertEquals(TEMP_SENSOR_2, reading.getTemperatureSensor2(), 0.1);
 		assertEquals(VIBRATION_SENSOR_1, reading.getVibrationSensor1());
 		assertEquals(VIBRATION_SENSOR_2, reading.getVibrationSensor2());
 	}

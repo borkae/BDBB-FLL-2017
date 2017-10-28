@@ -3,9 +3,7 @@ package com.bork.industries.collector.sensor;
 import java.io.IOException;
 
 import com.bork.industries.collector.sensor.types.SensorReading;
-import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CDevice;
-import com.pi4j.io.i2c.I2CFactory;
+import com.pi4j.io.i2c.*;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 /*-
@@ -14,14 +12,16 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
  * 0x01 	Temp Sensor 1 MSB
  * 0x02 	Temp Sensor 1 LSB
  * 0x03 	Temp Sensor 1 Faction
- * 0x04 	Temp Sensor 1 MSB
- * 0x05 	Temp Sensor 1 LSB
- * 0x06 	Temp Sensor 1 Faction
+ * 0x04 	Temp Sensor 2 MSB
+ * 0x05 	Temp Sensor 2 LSB
+ * 0x06 	Temp Sensor 2 Faction
  * 0x07 	Vibration Sensor 1 MSB
  * 0x08 	Vibration Sensor 1 LSB
  * 0x09 	Vibration Sensor 2 MSB
  * 0x0A 	Vibration Sensor 2 LSB
- * 0x0B 	Mode Register
+ * 0x0B		Pipe 1 On
+ * 0x0C		Pipe 2 On
+ * 0x0D 	Mode Register
  */
 public class I2cSensorCollector implements SensorCollector {
 	private I2CDevice device;
@@ -35,8 +35,8 @@ public class I2cSensorCollector implements SensorCollector {
 			System.err.println(e.getMessage());
 		}
 	}
-	
-	public I2cSensorCollector(I2CDevice device){
+
+	public I2cSensorCollector(I2CDevice device) {
 		this.device = device;
 	}
 
@@ -60,13 +60,19 @@ public class I2cSensorCollector implements SensorCollector {
 			int vibrSens2Msb = device.read(0x09);
 			int vibrSens2Lsb = device.read(0x0A);
 
+			int pipeOneOn = device.read(0x0B);
+			int pipeTwoOn = device.read(0x0C);
+
 			SensorReading sensorReading = new SensorReading();
 
-			sensorReading.setTempSensor1(((0xFF & tempSens1Msb) << 8) | (0xFF & tempSens1Lsb));
-			sensorReading.setTempSensor2(((0xFF & tempSens2Msb) << 8) | (0xFF & tempSens2Lsb));
+			sensorReading.setTemperatureSensor1(((0xFF & tempSens1Msb) << 8) | (0xFF & tempSens1Lsb));
+			sensorReading.setTemperatureSensor2(((0xFF & tempSens2Msb) << 8) | (0xFF & tempSens2Lsb));
 
 			sensorReading.setVibrationSensor1(((0xFF & vibrSens1Msb) << 8) | (0xFF & vibrSens1Lsb));
 			sensorReading.setVibrationSensor2(((0xFF & vibrSens2Msb) << 8) | (0xFF & vibrSens2Lsb));
+
+			sensorReading.setPipeOn1(pipeOneOn != 0);
+			sensorReading.setPipeOn2(pipeTwoOn != 0);
 
 			return sensorReading;
 		} catch (IOException e) {

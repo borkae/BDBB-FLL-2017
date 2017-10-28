@@ -41,8 +41,8 @@ public class I2cSensorCollectorTest {
 		SensorReading reading = sensorCollector.read();
 		mocksControl.verify();
 		
-		assertEquals(20000.0, reading.getTempSensor1(), 0.1);
-		assertEquals(30000.0, reading.getTempSensor2(), 0.1);
+		assertEquals(20000.0, reading.getTemperatureSensor1(), 0.1);
+		assertEquals(30000.0, reading.getTemperatureSensor2(), 0.1);
 		assertEquals(900, reading.getVibrationSensor1());
 		assertEquals(800, reading.getVibrationSensor2());
 	}

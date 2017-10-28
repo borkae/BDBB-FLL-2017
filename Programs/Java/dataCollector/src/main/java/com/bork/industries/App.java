@@ -1,38 +1,21 @@
 package com.bork.industries;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.*;
+import org.springframework.web.client.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.bork.industries.collector.meter.MeterCollector;
-import com.bork.industries.collector.meter.MeterCollectorFactory;
-import com.bork.industries.collector.meter.line.parser.MeterLineParser;
-import com.bork.industries.collector.meter.line.parser.MeterLineParserStringUtilsImpl;
+import com.bork.industries.collector.meter.*;
+import com.bork.industries.collector.meter.line.parser.*;
 import com.bork.industries.collector.meter.types.MeterReading;
-import com.bork.industries.collector.sensor.SensorCollector;
-import com.bork.industries.collector.sensor.SensorCollectorFactory;
-import com.bork.industries.publisher.DataPublisher;
-import com.bork.industries.publisher.DataPublisherFactory;
-import com.bork.industries.service.CompletionCallback;
-import com.bork.industries.service.DataCollectionService;
-import com.bork.industries.service.DataCollectionServiceImpl;
+import com.bork.industries.collector.sensor.*;
+import com.bork.industries.publisher.*;
+import com.bork.industries.service.*;
 import com.fazecast.jSerialComm.SerialPort;
 
 public class App {
@@ -40,11 +23,11 @@ public class App {
 	private static final String PORT_OPTION_NAME = "port";
 	private static final String METER_ID_OPTION_NAME = "meterId";
 	private static final String PUBLISH_INTERVAL_OPTION_NAME = "publishInterval";
+	private static final String SENSOR_BUST_OPTION_NAME = "sensorBus";
 
 	private static RestOperations restOperations = new RestTemplate();
 	private static MeterLineParser meterLineParser = new MeterLineParserStringUtilsImpl();
 
-	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		Options options = createOptions();
 		CommandLineParser parser = new DefaultParser();
@@ -153,6 +136,7 @@ public class App {
 		retval.setListPorts(line.hasOption(LIST_PORTS_OPTION_NAME));
 		retval.setCommPort(line.getOptionValue(PORT_OPTION_NAME));
 		retval.setMeterId(line.getOptionValue(METER_ID_OPTION_NAME));
+		retval.setSensorBus(line.getOptionValue(SENSOR_BUST_OPTION_NAME));
 		retval.setPublishInterval(converToPublishInterval(line.getOptionValue(PUBLISH_INTERVAL_OPTION_NAME, "15")));
 
 		return retval;
@@ -179,6 +163,9 @@ public class App {
 
 		Option meterId = Option.builder("m").longOpt(METER_ID_OPTION_NAME).hasArg().argName("Id").desc("The meter id grid insight should filter readings to.").build();
 		options.addOption(meterId);
+		
+		Option sensorBus = Option.builder("s").longOpt(SENSOR_BUST_OPTION_NAME).hasArg().argName("Sensor Bus").desc("The sensor bus to read sensor data.").build();
+		options.addOption(sensorBus);
 
 		Option publishRate = Option.builder("r").longOpt(PUBLISH_INTERVAL_OPTION_NAME).hasArg().argName("seconds")
 				.desc("The minimum time in seconds between reads to push the data to ThinkSpeak.  Default is 15 seconds.").build();

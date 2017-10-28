@@ -7,8 +7,8 @@ public class StubSensorCollector implements SensorCollector {
 
 	public StubSensorCollector(double tempSensor1, double tempSensor2, int vibrationSensor1, int vibrationSensor2) {
 		sensorReading = new SensorReading();
-		sensorReading.setTempSensor1(tempSensor1);
-		sensorReading.setTempSensor2(tempSensor2);
+		sensorReading.setTemperatureSensor1(tempSensor1);
+		sensorReading.setTemperatureSensor2(tempSensor2);
 		sensorReading.setVibrationSensor1(vibrationSensor1);
 		sensorReading.setVibrationSensor2(vibrationSensor2);
 	}
@@ -22,5 +22,4 @@ public class StubSensorCollector implements SensorCollector {
 	public SensorReading read() {
 		return sensorReading;
 	}
-
 }
