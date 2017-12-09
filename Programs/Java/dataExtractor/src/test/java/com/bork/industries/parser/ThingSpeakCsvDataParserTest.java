@@ -48,7 +48,7 @@ public class ThingSpeakCsvDataParserTest {
 		Map<ZonedDateTime, Long> actual = dataParser.parseToHour(inputStream);
 
 		assertNotNull(actual);
-		assertEquals(463, actual.size());
+		assertEquals(558, actual.size());
 
 		outputMap(actual);
 	}
